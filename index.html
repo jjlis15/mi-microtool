@@ -3,48 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de Correos Profesionales - Prueba</title>
+  <title>Asistente de Correos Profesionales con IA</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-6 flex flex-col items-center justify-center">
 
   <main class="max-w-xl w-full bg-white p-6 rounded-xl shadow-md border border-slate-200">
     <h1 class="text-2xl font-bold text-slate-900 mb-2">Asistente de Correos IA</h1>
-    <p class="text-sm text-slate-600 mb-4">Escribe un borrador rápido e informal para convertirlo en un mensaje profesional.</p>
+    <p class="text-sm text-slate-600 mb-4">Escribe un borrador rápido e informal para que la IA lo transforme en un mensaje profesional.</p>
 
-    <label class="block font-semibold text-slate-700 mb-2">Tu borrador:</label>
-    <textarea id="userInput" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" placeholder="Ej: Dile a mi jefe que no podré ir hoy porque me siento mal."></textarea>
+    <label class="block font-semibold text-slate-700 mb-2">Tu borrador o idea:</label>
+    <textarea id="userInput" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" placeholder="Ej: Dile a mi cliente que el informe se retrasará 2 días porque estamos revisando los datos."></textarea>
 
-    <button onclick="simularIA()" id="btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">
-      Transformar Correo
+    <button onclick="generarConIA()" id="btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition">
+      Redactar Correo Profesional
     </button>
 
     <div class="mt-6">
-      <label class="block font-semibold text-slate-700 mb-2">Resultado Profesional:</label>
-      <div id="output" class="p-4 bg-slate-50 border border-slate-200 rounded-lg min-h-[100px] text-slate-700 text-sm">
-        El resultado aparecerá aquí...
+      <label class="block font-semibold text-slate-700 mb-2">Resultado generado por Gemini IA:</label>
+      <div id="output" class="p-4 bg-slate-50 border border-slate-200 rounded-lg min-h-[120px] text-slate-700 text-sm whitespace-pre-line">
+        El resultado redactado aparecerá aquí...
       </div>
     </div>
   </main>
 
   <script>
-    function simularIA() {
-      const input = document.getElementById('userInput').value;
+    async function generarConIA() {
+      const input = document.getElementById('userInput').value.trim();
       const output = document.getElementById('output');
       const btn = document.getElementById('btn');
 
-      if (!input.trim()) {
-        alert('Por favor, escribe algo primero.');
+      if (!input) {
+        alert('Por favor, escribe un borrador antes de presionar el botón.');
         return;
       }
 
-      btn.innerText = 'Procesando...';
+      // CAMBIA ESTO: Pega tu clave de API de Google entre las comillas
+      const API_KEY = "AQ.Ab8RN6JpsgHkbceaG1-LyMm1fl8rVv6gOxDfVByHYnW2KtUEjQ"; 
       
-      // Simulador de respuesta en lo que conectamos la API real
-      setTimeout(() => {
-        output.innerHTML = `<strong>Asunto:</strong> Notificación de ausencia por motivos de salud<br><br>Estimado/a,<br><br>Le escribo para informarle que el día de hoy no me será posible asistí a la jornada laboral debido a un problema de salud. Mantendré el seguimiento de mis pendientes en cuanto sea posible.<br><br>Agradezco su comprensión.<br><br>Saludos cordiales.`;
-        btn.innerText = 'Transformar Correo';
-      }, 1000);
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+      btn.innerText = 'Consultando a la IA...';
+      btn.disabled = true;
+      output.innerText = 'Redactando versión profesional...';
+
+      const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }]
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+          output.innerText = data.candidates[0].content.parts[0].text;
+        } else {
+          output.innerText = 'Error al generar la respuesta. Revisa tu clave de API.';
+        }
+      } catch (error) {
+        console.error(error);
+        output.innerText = 'Error de conexión con la API de IA.';
+      } finally {
+        btn.innerText = 'Redactar Correo Profesional';
+        btn.disabled = false;
+      }
     }
   </script>
 
