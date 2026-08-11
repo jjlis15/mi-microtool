@@ -27,8 +27,12 @@
     </div>
   </main>
 
-  <script>
-    async function generarConIA() {
+  <!-- Carga de la SDK oficial de Google AI directamente desde CDN -->
+  <script type="module">
+    import { GoogleGenAI } from 'https://esm.run/@google/genai';
+
+    // Hacer la función accesible globalmente para el botón HTML
+    window.generarConIA = async function() {
       const input = document.getElementById('userInput').value.trim();
       const output = document.getElementById('output');
       const btn = document.getElementById('btn');
@@ -38,50 +42,43 @@
         return;
       }
 
-      // 1. Asegúrate de tener tu API Key aquí
+      // 1. PEGA AQUÍ TU API KEY GENERADA EN GOOGLE AI STUDIO
       const API_KEY = "AQ.Ab8RN6IEfIR9aX9e7DI1QpeEkSmuy2NW8Gc_8RUfcDCUIOeutw"; 
-      
-      // 2. Endpoint actualizado con gemini-2.5-flash
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
+      if (API_KEY === "PEGA_AQUI_TU_API_KEY" || !API_KEY) {
+        alert("Recuerda pegar tu API Key en la variable API_KEY del código.");
+        return;
+      }
 
       btn.innerText = 'Consultando a la IA...';
       btn.disabled = true;
       output.innerText = 'Redactando versión profesional...';
 
-      const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
-
       try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: promptText }]
-            }]
-          })
+        // Inicializar cliente oficial de Google AI
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+        const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
+
+        // Generar contenido usando el modelo recomendado
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: promptText,
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-          console.error('Error de Google API:', data.error);
-          output.innerText = `Error de la API (${data.error.code}): ${data.error.message}`;
-          return;
-        }
-
-        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-          output.innerText = data.candidates[0].content.parts[0].text;
+        if (response && response.text) {
+          output.innerText = response.text;
         } else {
-          output.innerText = 'No se pudo generar el texto. Intenta con otra frase.';
+          output.innerText = 'No se pudo obtener texto de la respuesta.';
         }
       } catch (error) {
-        console.error('Error de red:', error);
-        output.innerText = 'Error de conexión con la API de IA.';
+        console.error('Error con la SDK de Google AI:', error);
+        output.innerText = `Error: ${error.message || 'Verifica tu API Key o la consola para más detalles.'}`;
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
       }
-    }
+    };
   </script>
 
 </body>
