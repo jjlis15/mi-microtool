@@ -46,8 +46,8 @@
         return;
       }
 
-      // Endpoint oficial directo usando la API v1 estándar
-      const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+      // Endpoint oficial con el modelo gemini-3.6-flash
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`;
 
       btn.innerText = 'Consultando a la IA...';
       btn.disabled = true;
