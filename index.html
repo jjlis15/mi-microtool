@@ -27,11 +27,8 @@
     </div>
   </main>
 
-  <!-- Carga de la SDK oficial de Google AI directamente desde CDN -->
-  <script type="module">
-    import { GoogleGenAI } from 'https://esm.run/@google/genai';
-
-    window.generarConIA = async function() {
+  <script>
+    async function generarConIA() {
       const input = document.getElementById('userInput').value.trim();
       const output = document.getElementById('output');
       const btn = document.getElementById('btn');
@@ -41,42 +38,55 @@
         return;
       }
 
-      // 1. Pega tu API Key de Google AI Studio
+      // 1. PEGA AQUÍ TU API KEY GENERADA EN GOOGLE AI STUDIO
       const API_KEY = "AQ.Ab8RN6LkHIujTR6a8kobl3EN7SpLek214YGCz_4QiR8XN8rwUQ"; 
 
       if (API_KEY === "PEGA_AQUI_TU_API_KEY" || !API_KEY) {
-        alert("Recuerda reemplazar PEGA_AQUI_TU_API_KEY por tu clave real.");
+        alert("Por favor, pon tu clave API dentro de las comillas en el código.");
         return;
       }
+
+      // Endpoint oficial directo con el modelo gemini-2.0-flash
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
       btn.innerText = 'Consultando a la IA...';
       btn.disabled = true;
       output.innerText = 'Redactando versión profesional...';
 
+      const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
+
       try {
-        const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-        const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
-
-        // Nombre de modelo compatible y actualizado
-        const response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
-          contents: promptText,
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: promptText }]
+            }]
+          })
         });
 
-        if (response && response.text) {
-          output.innerText = response.text;
+        const data = await response.json();
+
+        if (data.error) {
+          console.error('Error API:', data.error);
+          output.innerText = `Error (${data.error.code}): ${data.error.message}`;
+          return;
+        }
+
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+          output.innerText = data.candidates[0].content.parts[0].text;
         } else {
-          output.innerText = 'No se pudo obtener texto de la respuesta.';
+          output.innerText = 'No se pudo generar la respuesta.';
         }
       } catch (error) {
-        console.error('Error:', error);
-        output.innerText = `Error: ${error.message || 'Error al conectar con la API.'}`;
+        console.error('Error de red:', error);
+        output.innerText = 'Error de conexión al procesar la solicitud.';
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
       }
-    };
+    }
   </script>
 
 </body>
