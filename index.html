@@ -38,9 +38,10 @@
         return;
       }
 
-      // CAMBIA ESTO: Pega tu clave de API de Google entre las comillas
+      // PEGA TU CLAVE AQUÍ SIN ESPACIOS EXTRA
       const API_KEY = "AQ.Ab8RN6JpsgHkbceaG1-LyMm1fl8rVv6gOxDfVByHYnW2KtUEjQ"; 
       
+      // Endpoint oficial de Gemini 1.5 Flash
       const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
       btn.innerText = 'Consultando a la IA...';
@@ -54,20 +55,29 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
+            contents: [{
+              parts: [{ text: promptText }]
+            }]
           })
         });
 
         const data = await response.json();
 
+        // Si Google devuelve un error en la respuesta HTTP
+        if (data.error) {
+          console.error('Error de Google API:', data.error);
+          output.innerText = `Error de la API (${data.error.code}): ${data.error.message}`;
+          return;
+        }
+
         if (data.candidates && data.candidates[0].content.parts[0].text) {
           output.innerText = data.candidates[0].content.parts[0].text;
         } else {
-          output.innerText = 'Error al generar la respuesta. Revisa tu clave de API.';
+          output.innerText = 'No se pudo generar el texto. Intenta con otra frase.';
         }
       } catch (error) {
-        console.error(error);
-        output.innerText = 'Error de conexión con la API de IA.';
+        console.error('Error de red:', error);
+        output.innerText = 'Error de conexión. Revisa tu consola o tu conexión a internet.';
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
