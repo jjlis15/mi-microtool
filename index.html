@@ -38,11 +38,11 @@
         return;
       }
 
-      // PEGA TU CLAVE AQUÍ SIN ESPACIOS EXTRA
+      // 1. Asegúrate de tener tu API Key aquí
       const API_KEY = "AQ.Ab8RN6IEfIR9aX9e7DI1QpeEkSmuy2NW8Gc_8RUfcDCUIOeutw"; 
       
-      // Endpoint oficial de Gemini 1.5 Flash
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+      // 2. Endpoint actualizado con gemini-2.5-flash
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
       btn.innerText = 'Consultando a la IA...';
       btn.disabled = true;
@@ -63,21 +63,20 @@
 
         const data = await response.json();
 
-        // Si Google devuelve un error en la respuesta HTTP
         if (data.error) {
           console.error('Error de Google API:', data.error);
           output.innerText = `Error de la API (${data.error.code}): ${data.error.message}`;
           return;
         }
 
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
           output.innerText = data.candidates[0].content.parts[0].text;
         } else {
           output.innerText = 'No se pudo generar el texto. Intenta con otra frase.';
         }
       } catch (error) {
         console.error('Error de red:', error);
-        output.innerText = 'Error de conexión. Revisa tu consola o tu conexión a internet.';
+        output.innerText = 'Error de conexión con la API de IA.';
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
