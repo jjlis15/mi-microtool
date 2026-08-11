@@ -31,7 +31,6 @@
   <script type="module">
     import { GoogleGenAI } from 'https://esm.run/@google/genai';
 
-    // Hacer la función accesible globalmente para el botón HTML
     window.generarConIA = async function() {
       const input = document.getElementById('userInput').value.trim();
       const output = document.getElementById('output');
@@ -42,11 +41,11 @@
         return;
       }
 
-      // 1. PEGA AQUÍ TU API KEY GENERADA EN GOOGLE AI STUDIO
+      // 1. Pega tu API Key de Google AI Studio
       const API_KEY = "AQ.Ab8RN6LkHIujTR6a8kobl3EN7SpLek214YGCz_4QiR8XN8rwUQ"; 
 
       if (API_KEY === "PEGA_AQUI_TU_API_KEY" || !API_KEY) {
-        alert("Recuerda pegar tu API Key en la variable API_KEY del código.");
+        alert("Recuerda reemplazar PEGA_AQUI_TU_API_KEY por tu clave real.");
         return;
       }
 
@@ -55,14 +54,13 @@
       output.innerText = 'Redactando versión profesional...';
 
       try {
-        // Inicializar cliente oficial de Google AI
         const ai = new GoogleGenAI({ apiKey: API_KEY });
 
         const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
 
-        // Generar contenido usando el modelo recomendado
+        // Nombre de modelo compatible y actualizado
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-1.5-flash',
           contents: promptText,
         });
 
@@ -72,8 +70,8 @@
           output.innerText = 'No se pudo obtener texto de la respuesta.';
         }
       } catch (error) {
-        console.error('Error con la SDK de Google AI:', error);
-        output.innerText = `Error: ${error.message || 'Verifica tu API Key o la consola para más detalles.'}`;
+        console.error('Error:', error);
+        output.innerText = `Error: ${error.message || 'Error al conectar con la API.'}`;
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
