@@ -38,39 +38,22 @@
         return;
       }
 
-      // 1. PEGA AQUÍ TU API KEY GENERADA EN GOOGLE AI STUDIO
-      const API_KEY = "AQ.Ab8RN6LkHIujTR6a8kobl3EN7SpLek214YGCz_4QiR8XN8rwUQ"; 
-
-      if (API_KEY === "PEGA_AQUI_TU_API_KEY" || !API_KEY) {
-        alert("Por favor, pon tu clave API dentro de las comillas en el código.");
-        return;
-      }
-
-      // Endpoint oficial con el modelo gemini-3.6-flash
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`;
-
       btn.innerText = 'Consultando a la IA...';
       btn.disabled = true;
       output.innerText = 'Redactando versión profesional...';
 
-      const promptText = `Actúa como un experto en comunicación corporativa. Transforma el siguiente texto o idea informal en un correo electrónico profesional, diplomático y asertivo en español. Incluye una línea de asunto sugerida al inicio:\n\nIdea del usuario: "${input}"`;
-
       try {
-        const response = await fetch(API_URL, {
+        // Ahora llamamos a nuestra propia API interna de Vercel de forma segura
+        const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: promptText }]
-            }]
-          })
+          body: JSON.stringify({ input: input })
         });
 
         const data = await response.json();
 
         if (data.error) {
-          console.error('Error API:', data.error);
-          output.innerText = `Error (${data.error.code}): ${data.error.message}`;
+          output.innerText = `Error: ${data.error}`;
           return;
         }
 
@@ -80,8 +63,8 @@
           output.innerText = 'No se pudo generar la respuesta.';
         }
       } catch (error) {
-        console.error('Error de red:', error);
-        output.innerText = 'Error de conexión al procesar la solicitud.';
+        console.error('Error:', error);
+        output.innerText = 'Error de conexión con el servidor.';
       } finally {
         btn.innerText = 'Redactar Correo Profesional';
         btn.disabled = false;
